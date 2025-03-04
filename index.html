@@ -11,39 +11,59 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
+            background-color: #f8f9fa;
         }
         h1 {
             color: #333;
+            margin-bottom: 20px;
         }
-        #chart-container {
-            width: 80%;
+        .container {
+            width: 90%;
+            max-width: 1200px;
             margin: auto;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
         table {
-            width: 80%;
-            margin: auto;
+            width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: center;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #007bff;
+            color: white;
+        }
+        .negative {
+            color: red;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to Poe's files</h1>
+    <div class="container">
+        <h1>Welcome to Poe's files</h1>
 
-    <!-- 摺線圖 -->
-    <div id="chart-container">
-        <canvas id="myChart"></canvas>
+        <!-- 圖表區 -->
+        <div class="chart-container">
+            <canvas id="myChart"></canvas>
+        </div>
+
+        <!-- Google Sheets 數據表 -->
+        <h2>Google Sheets 數據</h2>
+        <div id="data-container"></div>
     </div>
-
-    <!-- Google Sheets 數據表 -->
-    <div id="data-container"></div>
 </body>
 </html>

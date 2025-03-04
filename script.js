@@ -9,14 +9,24 @@ fetch("https://script.google.com/macros/s/AKfycbzToRBXwpG8EqeO_SZYo1Cmmo7IXE6h_P
     // 跳過第一行「最新價格」，只取第二行開始的數據
     let rows = data.slice(2);
 
-    // 轉換時間格式並存入數據陣列
-    rows.forEach(row => {
-      let rawDate = row[0]; // 原始日期格式
-      let formattedDate = new Date(rawDate).toISOString().split("T")[0]; // 轉換成 YYYY-MM-DD
-      labels.push(formattedDate);  // X 軸標籤
-      btcData.push(row[1]); // BTC/USD
-      ethData.push(row[2]); // ETH/USD
-      etcData.push(row[3]); // ETC/ETH
+    // 格式化數據
+    let formattedData = rows.map(row => {
+        let rawDate = row[0]; 
+        let formattedDate = new Date(rawDate).toISOString().split("T")[0]; // 轉換成 YYYY-MM-DD
+        return [
+            formattedDate, // 時間
+            (row[1] * 100).toFixed(2) + "%", // BTC/USD 百分比
+            (row[2] * 100).toFixed(2) + "%", // ETH/USD 百分比
+            (row[3] * 100).toFixed(2) + "%"  // ETC/ETH 百分比
+        ];
+    });
+
+    // 更新圖表數據
+    formattedData.forEach(row => {
+      labels.push(row[0]);  // X 軸時間
+      btcData.push(parseFloat(row[1])); // BTC/USD
+      ethData.push(parseFloat(row[2])); // ETH/USD
+      etcData.push(parseFloat(row[3])); // ETC/ETH
     });
 
     // 繪製 Chart.js 折線圖
@@ -65,15 +75,15 @@ fetch("https://script.google.com/macros/s/AKfycbzToRBXwpG8EqeO_SZYo1Cmmo7IXE6h_P
     });
 
     // 生成 Google Sheets 數據表格
-    let headers = data[1]; // 取標題列
-    let output = "<h2>Google Sheets 數據</h2><table><tr>";
-    headers.forEach(title => output += `<th>${title}</th>`);
-    output += "</tr>";
-
-    rows.forEach(row => {
-      output += "<tr>";
-      row.forEach(value => output += `<td>${value}</td>`);
-      output += "</tr>";
+    let output = "<table><tr><th>Time</th><th>BTCUSD</th><th>ETHUSD</th><th>ETCETH</th></tr>";
+    
+    formattedData.forEach(row => {
+      output += `<tr>
+          <td>${row[0]}</td>
+          <td>${row[1]}</td>
+          <td>${row[2]}</td>
+          <td class="${parseFloat(row[3]) < 0 ? 'negative' : ''}">${row[3]}</td>
+      </tr>`;
     });
 
     output += "</table>";
