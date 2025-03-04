@@ -3,13 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 Vercel 網站</title>
+    <title>Welcome to Poe's files</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #chart-container {
+            width: 80%;
+            margin: auto;
+        }
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <h1>歡迎來到我的網站</h1>
-    <p>這是透過 Vercel 部署的網頁！</p>
+    <h1>Welcome to Poe's files</h1>
 
-    <!-- 這裡是 script.js 的引用，確保它被載入 -->
-    <script src="script.js" defer></script>
+    <!-- 摺線圖 -->
+    <div id="chart-container">
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <!-- Google Sheets 數據表 -->
+    <div id="data-container"></div>
 </body>
 </html>
