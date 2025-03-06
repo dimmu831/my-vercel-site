@@ -3,67 +3,796 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Poe's files</title>
+    <title>陳中信的個人網站</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js" defer></script>
     <style>
-        body {
+        /* 基礎樣式 */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            font-family: 'Noto Sans TC', Arial, sans-serif;
+            height: 100%;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        /* 神經網絡背景 */
+        #neural-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1%, transparent 1%);
+            background-size: 20px 20px;
+            animation: twinkle 5s infinite;
+            z-index: -2;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        .neuron {
+            fill: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .input-neuron {
+            fill: rgba(50, 205, 50, 0.9);
+        }
+        
+        .output-neuron {
+            fill: rgba(255, 69, 0, 0.9);
+        }
+        
+        .connection {
+            stroke: rgba(0, 170, 255, 0.5);
+            stroke-width: 1;
+            stroke-dasharray: 3, 3;
+            transition: all 0.3s ease;
+        }
+        
+        .pulse {
+            fill: none;
+            stroke: #FFCC00;
+            stroke-width: 3;
+            stroke-dasharray: 5, 5;
+            animation: pulse 2s linear infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+            100% {
+                stroke-dashoffset: -50;
+                opacity: 0;
+            }
+        }
+        
+        .input-label, .output-label {
+            fill: #FFFFFF;
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f8f9fa;
+            font-size: 40px;
+            text-anchor: middle;
+            font-weight: bold;
         }
-        h1 {
-            color: #333;
+        
+        /* 頁面結構 */
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* 履歷區域 (上半部) */
+        .profile-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .resume-container {
+            width: 80%;
+            max-width: 1000px;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 頭部區域 */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
             margin-bottom: 20px;
+            position: relative;
         }
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: auto;
+        
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
         }
+        
+        .name-title {
+            flex: 1;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #fff, transparent);
+        }
+        
+        .position {
+            font-size: 1.2rem;
+            color: #ccc;
+            letter-spacing: 1px;
+        }
+        
+        /* 聯繫方式 */
+        .contact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: #ddd;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 內容區塊 */
+        .resume-section {
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #fff;
+            font-weight: 300;
+            letter-spacing: 1px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        /* 學歷和工作經歷 */
+        .timeline-item {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .timeline-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+        
+        .timeline-period {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-description {
+            font-size: 0.9rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+        
+        /* 技能 */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .skill-tag {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #fff;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        
+        .skill-tag:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 加密貨幣區域 (下半部) */
+        .crypto-section {
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .crypto-container {
+            width: 80%;
+            max-width: 1000px;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .chart-container {
-            background: white;
+            background: rgba(255, 255, 255, 0.05);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             overflow: hidden;
         }
+        
         th, td {
-            border: 1px solid #ddd;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 10px;
             text-align: center;
         }
+        
         th {
-            background-color: #007bff;
+            background-color: rgba(0, 123, 255, 0.3);
             color: white;
         }
+        
         .negative {
-            color: red;
+            color: #ff6b6b;
+        }
+        
+        /* 導航條 */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-button {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .resume-container,
+            .crypto-container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            h1::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .contact {
+                justify-content: center;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navbar {
+                top: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to Poe's files</h1>
-
-        <!-- 圖表區 -->
-        <div class="chart-container">
-            <canvas id="myChart"></canvas>
-        </div>
-
-        <!-- Google Sheets 數據表 -->
-        <h2>Google Sheets 數據</h2>
-        <div id="data-container"></div>
+    <!-- 神經網絡背景 -->
+    <svg id="neural-network"></svg>
+    
+    <!-- 導航條 -->
+    <div class="navbar">
+        <button class="nav-button" onclick="scrollToSection('profile-section')">履歷</button>
+        <button class="nav-button" onclick="scrollToSection('crypto-section')">財務數據</button>
     </div>
-</body>
-</html>
+    
+    <div class="page-container">
+        <!-- 個人履歷區域 -->
+        <section id="profile-section" class="profile-section">
+            <div class="resume-container">
+                <div class="header">
+                    <img src="imageMyself.jpg" alt="陳中信的大頭照" class="profile-img">
+                    <div class="name-title">
+                        <h1>陳中信</h1>
+                        <p class="position">專案主管 | AI 開發專家</p>
+                        
+                        <div class="contact">
+                            <div class="contact-item">
+                                <span>📱 0935-176-161</span>
+                            </div>
+                            <div class="contact-item">
+                                <span>📧 wewewewe@gmail.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <span>📍 台北市士林區</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-grid">
+                    <div class="resume-section">
+                        <h2>專業技能</h2>
+                        <div class="skills-container">
+                            <div class="skill-tag">AI 應用開發</div>
+                            <div class="skill-tag">機器學習</div>
+                            <div class="skill-tag">模型微調</div>
+                            <div class="skill-tag">Python</div>
+                            <div class="skill-tag">VBA</div>
+                            <div class="skill-tag">GAS</div>
+                            <div class="skill-tag">API 串接</div>
+                            <div class="skill-tag">自動化系統</div>
+                            <div class="skill-tag">財務數據分析</div>
+                            <div class="skill-tag">系統開發</div>
+                        </div>
+                    </div>
+                    
+                    <div class="resume-section">
+                        <h2>學歷</h2>
+                        <div class="timeline-item">
+                            <div class="timeline-title">國立江大</div>
+                            <div class="timeline-period">2000/9 ~ 2003/5</div>
+                            <div class="timeline-description">碩士學位</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-title">國立東大</div>
+                            <div class="timeline-period">1997/9 ~ 2000/7</div>
+                            <div class="timeline-description">學士學位</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-title">光武工專</div>
+                            <div class="timeline-period">1992/9 ~ 1997/7</div>
+                            <div class="timeline-description">專科學位</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="resume-section">
+                    <h2>工作經歷</h2>
+                    <div class="timeline-item">
+                        <div class="timeline-title">捷喜多媒體數位股份有限公司</div>
+                        <div class="timeline-period">2021/11 - 至今</div>
+                        <div class="timeline-description">
+                            負責 AI 自動化新聞上刊系統、CRM 開發等。運用機器學習和自動化技術，提升內容處理效率和精確度。
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-title">國泰人壽</div>
+                        <div class="timeline-period">2007/4 - 2012/1</div>
+                        <div class="timeline-description">
+                            擔任業務主管，負責業務員管理。建立有效的團隊激勵機制，提高業績表現。
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-title">國泰人壽財務部</div>
+                        <div class="timeline-period">2005/10 - 2007/3</div>
+                        <div class="timeline-description">
+                            從事數據分析與風險評估。開發財務分析工具，協助管理層做出更精準的決策。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 加密貨幣數據區域 -->
+        <section id="crypto-section" class="crypto-section">
+            <div class="crypto-container">
+                <h1>財務數據分析</h1>
+                
+                <!-- 圖表區 -->
+                <div class="chart-container">
+                    <canvas id="myChart"></canvas>
+                </div>
+                
+                <!-- Google Sheets 數據表 -->
+                <h2>市場數據</h2>
+                <div id="data-container"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 页面滾動功能
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            window.scrollTo({
+                top: section.offsetTop,
+                behavior: 'smooth'
+            });
+        }
+        
+        // 神經網絡背景動畫
+        (function initNeuralNetwork() {
+            // 設置神經網絡參數
+            const layers = [6, 8, 10, 8, 6];
+            const neurons = [];
+            const connections = [];
+            const svg = document.getElementById('neural-network');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // 創建神經元
+            function createNeurons() {
+                const layerWidth = width / (layers.length + 3); // 為輸入和輸出層預留空間
+                
+                // 創建輸入層
+                const inputNeurons = [];
+                const inputCount = 4; // 輸入節點數量
+                const inputSpacing = height / (inputCount + 1);
+                for (let i = 0; i < inputCount; i++) {
+                    const x = layerWidth * 0.5;
+                    const y = inputSpacing * (i + 1);
+                    
+                    const inputNeuron = { x, y, layer: -1, index: i, type: 'input' };
+                    inputNeurons.push(inputNeuron);
+                    neurons.push(inputNeuron);
+                    
+                    // 添加輸入節點的標籤
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', x - 30);
+                    label.setAttribute('y', y + 6);
+                    label.setAttribute('class', 'input-label');
+                    label.textContent = `X${i+1}`;
+                    svg.appendChild(label);
+                    
+                    // 創建輸入節點
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', 7);
+                    circle.setAttribute('class', 'input-neuron');
+                    
+                    // 懸停效果
+                    circle.addEventListener('mouseenter', () => {
+                        circle.setAttribute('r', 10);
+                        circle.style.fill = 'rgba(255, 255, 255, 1)';
+                    });
+                    circle.addEventListener('mouseleave', () => {
+                        circle.setAttribute('r', 7);
+                        circle.style.fill = 'rgba(50, 205, 50, 0.9)';
+                    });
+                    
+                    svg.appendChild(circle);
+                }
+                
+                // 創建隱藏層
+                for (let l = 0; l < layers.length; l++) {
+                    const layerHeight = height / (layers[l] + 1);
+                    const x = layerWidth * (l + 2); // 向右移動一個位置，為輸入層留空間
+                    
+                    for (let n = 0; n < layers[l]; n++) {
+                        const y = layerHeight * (n + 1);
+                        const neuron = { x, y, layer: l, index: n, type: 'hidden' };
+                        neurons.push(neuron);
+                        
+                        // 創建神經元
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', x);
+                        circle.setAttribute('cy', y);
+                        circle.setAttribute('r', 5.5);
+                        circle.setAttribute('class', 'neuron');
+                        
+                        // 懸停效果
+                        circle.addEventListener('mouseenter', () => {
+                            circle.setAttribute('r', 8);
+                            circle.style.fill = 'rgba(255, 255, 255, 1)';
+                        });
+                        circle.addEventListener('mouseleave', () => {
+                            circle.setAttribute('r', 5.5);
+                            circle.style.fill = 'rgba(255, 255, 255, 0.7)';
+                        });
+                        
+                        svg.appendChild(circle);
+                    }
+                }
+                
+                // 創建輸出層
+                const outputNeurons = [];
+                const outputCount = 3; // 輸出節點數量
+                const outputSpacing = height / (outputCount + 1);
+                for (let i = 0; i < outputCount; i++) {
+                    const x = width - layerWidth * 0.5;
+                    const y = outputSpacing * (i + 1);
+                    
+                    const outputNeuron = { x, y, layer: layers.length, index: i, type: 'output' };
+                    outputNeurons.push(outputNeuron);
+                    neurons.push(outputNeuron);
+                    
+                    // 添加輸出節點的標籤
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', x + 30);
+                    label.setAttribute('y', y + 6);
+                    label.setAttribute('class', 'output-label');
+                    label.textContent = `Y${i+1}`;
+                    svg.appendChild(label);
+                    
+                    // 創建輸出節點
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', 7);
+                    circle.setAttribute('class', 'output-neuron');
+                    
+                    // 懸停效果
+                    circle.addEventListener('mouseenter', () => {
+                        circle.setAttribute('r', 10);
+                        circle.style.fill = 'rgba(255, 255, 255, 1)';
+                    });
+                    circle.addEventListener('mouseleave', () => {
+                        circle.setAttribute('r', 7);
+                        circle.style.fill = 'rgba(255, 69, 0, 0.9)';
+                    });
+                    
+                    svg.appendChild(circle);
+                }
+                
+                return { inputNeurons, outputNeurons };
+            }
+            
+            // 創建連接
+            function createConnections(inputNeurons, outputNeurons) {
+                // 連接輸入層到第一隱藏層
+                const firstHiddenLayerStart = inputNeurons.length;
+                const firstHiddenLayerSize = layers[0];
+                
+                for (let i = 0; i < inputNeurons.length; i++) {
+                    for (let h = 0; h < firstHiddenLayerSize; h++) {
+                        const inputNeuron = inputNeurons[i];
+                        const hiddenNeuron = neurons[firstHiddenLayerStart + h];
+                        
+                        const connection = {
+                            x1: inputNeuron.x,
+                            y1: inputNeuron.y,
+                            x2: hiddenNeuron.x,
+                            y2: hiddenNeuron.y,
+                            active: false
+                        };
+                        connections.push(connection);
+                        
+                        // 創建連接線
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', connection.x1);
+                        line.setAttribute('y1', connection.y1);
+                        line.setAttribute('x2', connection.x2);
+                        line.setAttribute('y2', connection.y2);
+                        line.setAttribute('class', 'connection');
+                        
+                        // 懸停效果
+                        line.addEventListener('mouseenter', () => {
+                            line.style.stroke = 'rgba(0, 255, 255, 0.8)';
+                            line.style.strokeWidth = '2';
+                        });
+                        line.addEventListener('mouseleave', () => {
+                            line.style.stroke = 'rgba(0, 170, 255, 0.5)';
+                            line.style.strokeWidth = '1';
+                        });
+                        
+                        svg.appendChild(line);
+                    }
+                }
+                
+                // 連接隱藏層之間
+                let prevLayerStart = inputNeurons.length;
+                
+                for (let l = 1; l < layers.length; l++) {
+                    const prevLayerSize = layers[l-1];
+                    const currentLayerSize = layers[l];
+                    const currentLayerStart = prevLayerStart + prevLayerSize;
+                    
+                    for (let p = 0; p < prevLayerSize; p++) {
+                        const prevNeuron = neurons[prevLayerStart + p];
+                        
+                        for (let c = 0; c < currentLayerSize; c++) {
+                            const currentNeuron = neurons[currentLayerStart + c];
+                            const connection = {
+                                x1: prevNeuron.x,
+                                y1: prevNeuron.y,
+                                x2: currentNeuron.x,
+                                y2: currentNeuron.y,
+                                active: false
+                            };
+                            connections.push(connection);
+                            
+                            // 創建連接線
+                            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                            line.setAttribute('x1', connection.x1);
+                            line.setAttribute('y1', connection.y1);
+                            line.setAttribute('x2', connection.x2);
+                            line.setAttribute('y2', connection.y2);
+                            line.setAttribute('class', 'connection');
+                            
+                            // 懸停效果
+                            line.addEventListener('mouseenter', () => {
+                                line.style.stroke = 'rgba(0, 255, 255, 0.8)';
+                                line.style.strokeWidth = '2';
+                            });
+                            line.addEventListener('mouseleave', () => {
+                                line.style.stroke = 'rgba(0, 170, 255, 0.5)';
+                                line.style.strokeWidth = '1';
+                            });
+                            
+                            svg.appendChild(line);
+                        }
+                    }
+                    
+                    prevLayerStart += prevLayerSize;
+                }
+                
+                // 連接最後一個隱藏層到輸出層
+                const lastHiddenLayerStart = inputNeurons.length + layers.slice(0, -1).reduce((a, b) => a + b, 0);
+                const lastHiddenLayerSize = layers[layers.length - 1];
+                
+                for (let h = 0; h < lastHiddenLayerSize; h++) {
+                    for (let o = 0; o < outputNeurons.length; o++) {
+                        const hiddenNeuron = neurons[lastHiddenLayerStart + h];
+                        const outputNeuron = outputNeurons[o];
+                        
+                        const connection = {
+                            x1: hiddenNeuron.x,
+                            y1: hiddenNeuron.y,
+                            x2: outputNeuron.x,
+                            y2: outputNeuron.y,
+                            active: false
+                        };
+                        connections.push(connection);
+                        
+                        // 創建連接線
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', connection.x1);
+                        line.setAttribute('y1', connection.y1);
+                        line.setAttribute('x2', connection.x2);
+                        line.setAttribute('y2', connection.y2);
+                        line.setAttribute('class', 'connection');
+                        
+                        // 懸停效果
+                        line.addEventListener('mouseenter', () => {
+                            line.style.stroke = 'rgba(0, 255, 255, 0.8)';
+                            line.style.strokeWidth = '2';
+                        });
+                        line.addEventListener('mouseleave', () => {
+                            line.style.stroke = 'rgba(0, 170, 255, 0.5)';
+                            line.style.strokeWidth = '1';
+                        });
+                        
+                        svg.appendChild(line);
+                    }
+                }
+            }
+            
+            // 創建脈衝動畫
+            function createPulse(connection) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', connection.x1);
+                line.setAttribute('y1', connection.y1);
+                line.setAttribute('x2', connection.x2);
+                line.setAttribute('y2', connection.y2);
+                line.setAttribute('class', 'pulse');
+                
+                // 隨機延遲動畫
+                line.style.animationDelay = Math.random() * 4 + 's';
+                
+                // 動畫結束後移除元素
+                line.addEventListener('animationiteration', () => {
+                    // 有 20% 的機率保留動畫繼續運行
+                    if (Math.random() > 0.2) {
+                        line.remove();
+                    }
+                });
+                
+                svg.appendChild(line);
+            }
+            
+            // 隨機激活連接
+            function activateRandomConnections() {
+                const
